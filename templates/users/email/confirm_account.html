@@ -107,7 +107,7 @@
     <div
         style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: 'Lato', Helvetica, Arial, sans-serif; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
         Nuevo Evento. </div>
-    {% for info in data %}
+    
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <!-- LOGO -->
         <tr>
@@ -125,8 +125,8 @@
                     <tr>
                         <td bgcolor="#ffffff" align="center" valign="top"
                             style="padding: 40px 20px 20px 20px; border-radius: 4px 4px 0px 0px; color: #111111; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 36px; font-weight: 350; letter-spacing: 4px; line-height: 36px;">
-                            <h5 style="font-size: 40px; font-weight: 350; margin: 2;">Evento: {{ info.name }}</h5> 
-                            <img src="cid:coupon_image" width="250" height="255" style="display: block; border: 0px;" />
+                            <h5 style="font-size: 40px; font-weight: 350; margin: 2;">Bienvenido</h5> 
+                            <img src="" width="250" height="255" style="display: block; border: 0px;" />
                         </td>
                     </tr>
                 </table>
@@ -140,40 +140,17 @@
                         <td bgcolor="#ffffff" align="center"
                             style="padding: 20px 30px 40px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 18px;">
                             
-                            <p style="margin: 0;">Creado por: {{ info.create_by.get_full_name }}</p>
+                            <p style="margin: 0;">Usuario: {{ email }}</p>
                         </td>
                     </tr>
                     <tr>
                         <td bgcolor="#ffffff" align="center"
                             style="padding: 20px 30px 40px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">
                             
-                            <p style="margin: 0;">{{ info.description }}</p>
+                            <p style="margin: 0;">Contraseña: {{ password }}</p>
                         </td>
                     </tr>
 
-                    <tr>
-                        <td bgcolor="#ffffff" align="center"
-                            style="padding: 0px 30px 0px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">
-                            <p style="margin: 0;">Fecha: {{ info.date_start }}</p>
-
-                        </td>
-                    </tr> <!-- COPY -->
-                    <tr>
-                        <td bgcolor="#ffffff" align="center"
-                            style="padding: 0px 30px 0px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">
-
-                            <p style="margin: 0;">Hora: {{ info.hour_start }} hrs</p>
-
-
-                        </td>
-                    </tr> <!-- COPY -->
-
-                    <tr>
-                        <td bgcolor="#ffffff" align="center"
-                            style="padding: 0px 30px 40px 30px; border-radius: 0px 0px 4px 4px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;">
-                            <h5>Estatus: <span class="badge bg-success">{{ info.status }}</span></h5>
-                        </td>
-                    </tr>
                     <tr>
                         <td bgcolor="#ffffff" align="left">
                             <table width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -183,7 +160,7 @@
                                             <tr>
                                                 <td align="center" style="border-radius: 3px;" bgcolor="#FFA73B"><a
                                                         href="#" target="_blank"
-                                                        style="font-size: 20px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; color: #ffffff; text-decoration: none; padding: 15px 25px; border-radius: 2px; border: 1px solid #FFA73B; display: inline-block;">Participar</a>
+                                                        style="font-size: 20px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; color: #ffffff; text-decoration: none; padding: 15px 25px; border-radius: 2px; border: 1px solid #FFA73B; display: inline-block;">Comenzar</a>
                                                 </td>
                                             </tr>
                                         </table>
@@ -225,7 +202,7 @@
             </td>
         </tr>
     </table>
-    {% endfor %}
+    
 </body>
 
 </html>

@@ -8,7 +8,7 @@ app_name = "events_app"
 urlpatterns = [
     # lista eventos
     path(
-        'api/events/list/',
+        'api/events/list/<str:status>/',
         views.List_Events.as_view()
     ),
     # Recuperar evento

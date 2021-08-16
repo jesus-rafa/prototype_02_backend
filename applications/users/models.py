@@ -46,7 +46,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
     def get_full_name(self):
-        return self.names + ' ' + self.last_names
+        if self.names:
+            name = self.names + ' ' + self.last_names
+        else:
+            name = ''
+        return name
 
     def get_initials(self):
         return self.names[:1].upper() + self.last_names[:1].upper()

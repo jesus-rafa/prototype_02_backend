@@ -13,13 +13,13 @@ class Order(TimeStampedModel):
                              related_name='order_user', on_delete=models.CASCADE)
     date = models.DateField('Fecha Pedido')
     amount = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True)
-    quantity = models.IntegerField(default=1)
+        max_digits=8, decimal_places=2, blank=True, null=True, default=0)
+    quantity = models.IntegerField(default=0)
     paid_out = models.BooleanField(default=False)
     tip = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True)
+        max_digits=8, decimal_places=2, blank=True, null=True, default=0)
     remaining = models.DecimalField(
-        max_digits=8, decimal_places=2, blank=True, null=True)
+        max_digits=8, decimal_places=2, blank=True, null=True, default=0)
 
     objects = OrderManager()
 

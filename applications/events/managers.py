@@ -8,3 +8,9 @@ class EventsManager(models.Manager):
         return self.filter(
             create_by=idUser,
         ).order_by('created')
+
+    def filter_events(self, status):
+
+        return self.filter(
+            status=status,
+        ).order_by('created')

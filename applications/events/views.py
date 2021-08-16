@@ -11,7 +11,8 @@ from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from .models import Event, Event_Detail
 # local serialiozers
 from .serializers import (CRUD_DetailEventSerializer, CRUD_EventSerializer,
-                          DetailSerializer, EventSerializer)
+                          DetailSerializer, EventSerializer,
+                          PaginationSerializer)
 
 
 class List_EventUser(ListAPIView):
@@ -50,12 +51,15 @@ class UpdateDetail(UpdateAPIView):
 
 class List_Events(ListAPIView):
     """
-        Vista para listar eventos
+        filtrar eventos por Estatus
     """
     serializer_class = EventSerializer
+    pagination_class = PaginationSerializer
 
     def get_queryset(self):
-        return Event.objects.all()
+        status = self.kwargs['status']
+
+        return Event.objects.filter_events(status)
 
 
 class RetrieveEvent(RetrieveAPIView):

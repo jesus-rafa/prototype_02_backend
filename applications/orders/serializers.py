@@ -11,6 +11,7 @@ class UsersSerializers(serializers.ModelSerializer):
         model = User
         fields = (
             'id',
+            'email',
             'get_full_name',
             'get_initials',
             'avatar'

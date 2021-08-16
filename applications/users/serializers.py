@@ -34,7 +34,7 @@ class MembersSerializer(serializers.ModelSerializer):
 
 
 class TribesSerializer(serializers.ModelSerializer):
-    #members = MembersSerializer(many=True)
+    #user = MembersSerializer()
     sum_members = serializers.SerializerMethodField()
 
     class Meta:

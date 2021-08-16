@@ -1,4 +1,12 @@
+#from django.contrib.sites.models import Site
+import datetime
+import os
+import random
+import string
+from email.mime.image import MIMEImage
+
 from applications.events.models import Event
+from applications.orders.models import Order
 from applications.users import serializers
 from applications.users.models import Tribes, User
 from django.conf import settings
@@ -137,23 +145,75 @@ class SendFormEmail(View):
 class Invitations(CreateAPIView):
     """ Enviar correos a todos los miembros de la tribu """
     serializer_class = InvitationSerializer
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
 
     def create(self, request,  *args, **kwargs):
         serializer = InvitationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        #list_emails = []
-        # list_emails = ['rafa_chiv@hotmail.es',
-        #                'rafalopezrl749@gmail.com', 'lopezlucero018@gmail.com']
-
         # Recuperar datos
         idEvent = serializer.validated_data['idEvent']
         listEmails = serializer.validated_data['listEmails']
 
+        #listEmails = ['rafalopezrl749@gmail.com', 'kathia@gmail.com']
+
         event = Event.objects.filter(id=idEvent)
-        #event.status = 'EN PROCESO'
-        # event.save()
+        event_instance = Event.objects.get(id=idEvent)
+        event_instance.status = 'EN PROCESO'
+        event_instance.save()
+
+        for email in listEmails:
+            user_instance = User.objects.filter(email=email)
+
+            # Crear las ordenes de cada participante
+            if user_instance:
+                Order.objects.create(
+                    event=event_instance,
+                    user=user_instance,
+                    date=datetime.date.today()
+                )
+            else:
+                password = ''.join(
+                    [random.choice(string.digits + string.ascii_letters)
+                     for i in range(0, 8)]
+                )
+
+                user_new = User.objects.create_user(
+                    email,
+                    password,
+                    '',
+                    '',
+                    ''
+                )
+
+                Order.objects.create(
+                    event=event_instance,
+                    user=user_new,
+                    date=datetime.date.today()
+                )
+
+                # Enviar correo de confirmacion
+                subject = 'Activar Cuenta'
+                text_content = ''
+                html_content = render_to_string(
+                    'users/email/confirm_account.html',
+                    {'email': email, 'password': password}
+                )
+                msg = EmailMultiAlternatives(
+                    subject,
+                    text_content,
+                    settings.EMAIL_HOST_USER,
+                    [email]
+                )
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
+                # Enviar correo de confirmacion
+
+        # cargar adjuntos en el email
+        coupon_image = event[0].image
+        img_data = coupon_image.read()
+        img = MIMEImage(img_data)
+        img.add_header('Content-ID', '<coupon_image>')
 
         # Envio de correos
         subject = 'Invitacion a un Evento: ' + event[0].name
@@ -169,13 +229,14 @@ class Invitations(CreateAPIView):
             listEmails
         )
         msg.attach_alternative(html_content, "text/html")
+        msg.mixed_subtype = 'related'
+        msg.attach(img)
         msg.send()
 
         response = {
             'status': 'success',
             'code': status.HTTP_200_OK,
-            'message': 'Invitaciones Enviadas Exitosamente!',
-            'data': []
+            'message': 'Invitaciones Enviadas Exitosamente!'
         }
 
         return Response(response)

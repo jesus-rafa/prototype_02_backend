@@ -163,7 +163,7 @@ class Invitations(CreateAPIView):
         event_instance.save()
 
         for email in listEmails:
-            user_instance = User.objects.filter(email=email)
+            user_instance = User.objects.get(email=email)
 
             # Crear las ordenes de cada participante
             if user_instance:
@@ -178,13 +178,14 @@ class Invitations(CreateAPIView):
                      for i in range(0, 8)]
                 )
 
-                user_new = User.objects.create_user(
+                User.objects.create_user(
                     email,
                     password,
                     '',
                     '',
                     ''
                 )
+                user_new = User.objects.get(email=email)
 
                 Order.objects.create(
                     event=event_instance,

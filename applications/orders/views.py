@@ -8,7 +8,8 @@ from rest_framework.response import Response
 
 from .functions import update_order
 from .models import Order, OrderItem
-from .serializers import CRUD_OrderItemSerializer, OrderSerializer
+from .serializers import (CRUD_OrderItemSerializer, OrderSerializer,
+                          PaidOutSerializer)
 
 
 class List_OrderEvent(ListAPIView):
@@ -86,6 +87,26 @@ class EditCart(UpdateAPIView):
         serializer.save()
 
         update_order(idOrder)
+        return Response({'response': 'ok'})
+
+
+class EditPaid(UpdateAPIView):
+    serializer_class = PaidOutSerializer
+    queryset = Order.objects.all()
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+
+        instance.amount_paid = serializer.validated_data['amount_paid']
+        if instance.amount >= serializer.validated_data['amount_paid']:
+            instance.paid_out = True
+
+        instance.save()
+
         return Response({'response': 'ok'})
 
 

@@ -14,6 +14,8 @@ class Order(TimeStampedModel):
     date = models.DateField('Fecha Pedido')
     amount = models.DecimalField(
         max_digits=8, decimal_places=2, blank=True, null=True, default=0)
+    amount_paid = models.DecimalField(
+        max_digits=8, decimal_places=2, blank=True, null=True, default=0)
     quantity = models.IntegerField(default=0)
     paid_out = models.BooleanField(default=False)
     tip = models.DecimalField(

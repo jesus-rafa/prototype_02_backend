@@ -9,8 +9,13 @@ app_name = "orders_app"
 urlpatterns = [
     # lista orden por evento
     path(
-        'api/orders/by-event/<id>/',
+        'api/orders/by-event/<int:id>/',
         views.List_OrderEvent.as_view(),
+    ),
+    # actualizar pagos
+    path(
+        'api/orders/paid-out/<int:pk>/',
+        views.EditPaid.as_view(),
     ),
     # lista orden por evento y por usuario
     path(

@@ -55,11 +55,21 @@ class OrderSerializer(serializers.ModelSerializer):
             'user',
             'date',
             'amount',
+            'amount_paid',
             'quantity',
             'paid_out',
             'tip',
             'remaining',
             'items'
+        )
+
+
+class PaidOutSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Order
+        fields = (
+            'amount_paid',
         )
 
 

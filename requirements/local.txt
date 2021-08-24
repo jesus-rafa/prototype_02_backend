@@ -21,3 +21,4 @@ requests==2.26.0
 sqlparse==0.4.1
 Unipath==1.1
 urllib3==1.26.6
+social-auth-app-django==5.0.0

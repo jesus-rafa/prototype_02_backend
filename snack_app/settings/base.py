@@ -52,6 +52,8 @@ THIRD_PARTY_APPS = (
     'knox',
     'corsheaders',
     'mercadopago',
+    'social_django',  # <-- Here social-auth-app-django
+    'social_django_mongoengine'
 )
 
 REST_FRAMEWORK = {
@@ -74,6 +76,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'social_django.middleware.SocialAuthExceptionMiddleware',  # <-- Here
 ]
 
 
@@ -97,7 +100,9 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+                'django.contrib.messages.context_processors.messages',                
+                'social_django.context_processors.backends',  # <-- Here
+                'social_django.context_processors.login_redirect', # <-- Here
             ],
         },
     },

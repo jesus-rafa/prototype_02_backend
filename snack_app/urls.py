@@ -40,7 +40,7 @@ urlpatterns = [
     re_path('', include('applications.orders.routers')),
 
     #Social Login
-    path('oauth/', include('social_django.urls', namespace='social')),  # <-- 
+    path('', include('social_django.urls', namespace='social')),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

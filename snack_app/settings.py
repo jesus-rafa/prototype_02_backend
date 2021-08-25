@@ -126,17 +126,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.facebook.FacebookOAuth2',
-    'social_core.backends.twitter.TwitterOAuth',
-    'social_core.backends.github.GithubOAuth2',
+    #'social_core.backends.twitter.TwitterOAuth',
+    #'social_core.backends.github.GithubOAuth2',
+    #'social_core.backends.open_id.OpenIdAuth',
+    #'social_core.backends.google.GoogleOpenId',
+    #'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.google.GoogleOAuth',
+    #'social_core.backends.twitter.TwitterOAuth',
+    #'social_core.backends.yahoo.YahooOpenId',
+    'social_core.backends.apple.AppleIdAuth', 
+    #'users.backends.AppleIdAppAuth',
+    #'users.backends.AppleIdWebAuth',
 
     'django.contrib.auth.backends.ModelBackend',
+    
 )
-
-LOGIN_URL = 'login'
-LOGOUT_URL = 'logout'
-LOGIN_REDIRECT_URL = 'home'
-
-SOCIAL_AUTH_FACEBOOK_KEY = '209813464447923'  # App ID
-SOCIAL_AUTH_FACEBOOK_SECRET = '90664640d2a5c6f282d73ea3e7d3cbf1'  # App Secret
-SOCIAL_AUTH_STORAGE = 'social_django_mongoengine.models.DjangoStorage'
-SOCIAL_AUTH_POSTGRES_JSONFIELD = True

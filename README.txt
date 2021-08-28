@@ -21,7 +21,9 @@ CREATE USER rafa;
 ALTER ROLE rafa WITH PASSWORD 'rafa2020';
 
 # Sacar respaldos de la base de datos
-python manage.py dumbdata
+python manage.py dumpdata
+
+# Cargar respaldo a la base de datos
 python manage.py loaddata name.json
 
 

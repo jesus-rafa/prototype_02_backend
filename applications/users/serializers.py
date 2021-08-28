@@ -1,4 +1,5 @@
 #from django.contrib.auth.models import User
+from applications.events.serializers import UsersSerializers
 from applications.users.models import Tribes, User
 from django.db.models.fields.related import ManyToManyField
 from rest_framework import serializers
@@ -35,6 +36,7 @@ class MembersSerializer(serializers.ModelSerializer):
 
 class TribesSerializer(serializers.ModelSerializer):
     #user = MembersSerializer()
+    user = UsersSerializers()
     sum_members = serializers.SerializerMethodField()
 
     class Meta:

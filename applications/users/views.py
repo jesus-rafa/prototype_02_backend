@@ -145,7 +145,7 @@ class SendFormEmail(View):
 class Invitations(CreateAPIView):
     """ Enviar correos a todos los miembros de la tribu """
     serializer_class = InvitationSerializer
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def create(self, request,  *args, **kwargs):
         serializer = InvitationSerializer(data=request.data)
@@ -154,16 +154,24 @@ class Invitations(CreateAPIView):
         # Recuperar datos
         idEvent = serializer.validated_data['idEvent']
         listEmails = serializer.validated_data['listEmails']
-
-        #listEmails = ['rafalopezrl749@gmail.com', 'kathia@gmail.com']
+        listRegisteredEmails = []
 
         event = Event.objects.filter(id=idEvent)
         event_instance = Event.objects.get(id=idEvent)
         event_instance.status = 'EN PROCESO'
         event_instance.save()
 
+        # cargar adjuntos en el email
+        coupon_image = event[0].image
+        img_data = coupon_image.read()
+        img = MIMEImage(img_data)
+        img.add_header('Content-ID', '<coupon_image>')
+
         for email in listEmails:
-            user_instance = User.objects.get(email=email)
+            if User.objects.filter(email=email).exists():
+                user_instance = User.objects.get(email=email)
+            else:
+                user_instance = None
 
             # Crear las ordenes de cada participante
             if user_instance:
@@ -172,18 +180,17 @@ class Invitations(CreateAPIView):
                     user=user_instance,
                     date=datetime.date.today()
                 )
+
+                listRegisteredEmails.append(email)
             else:
+                # Si el correo no esta registrado lo inserta
                 password = ''.join(
                     [random.choice(string.digits + string.ascii_letters)
                      for i in range(0, 8)]
                 )
 
                 User.objects.create_user(
-                    email,
-                    password,
-                    '',
-                    '',
-                    ''
+                    email, password, '', '', ''
                 )
                 user_new = User.objects.get(email=email)
 
@@ -193,30 +200,25 @@ class Invitations(CreateAPIView):
                     date=datetime.date.today()
                 )
 
-                # Enviar correo de confirmacion
-                subject = 'Activar Cuenta'
+                # Envio de correos para usuarios nuevos
+                subject = 'Invitacion a un Evento: ' + event[0].name
                 text_content = ''
                 html_content = render_to_string(
-                    'users/email/confirm_account.html',
-                    {'email': email, 'password': password}
+                    'users/email/card_new.html',
+                    {'data': event, 'email': email, 'password': password}
                 )
-                msg = EmailMultiAlternatives(
+                msg2 = EmailMultiAlternatives(
                     subject,
                     text_content,
                     settings.EMAIL_HOST_USER,
                     [email]
                 )
-                msg.attach_alternative(html_content, "text/html")
-                msg.send()
-                # Enviar correo de confirmacion
+                msg2.attach_alternative(html_content, "text/html")
+                msg2.mixed_subtype = 'related'
+                msg2.attach(img)
+                msg2.send()
 
-        # cargar adjuntos en el email
-        coupon_image = event[0].image
-        img_data = coupon_image.read()
-        img = MIMEImage(img_data)
-        img.add_header('Content-ID', '<coupon_image>')
-
-        # Envio de correos
+        # Envio de correos para usuarios ya registrados
         subject = 'Invitacion a un Evento: ' + event[0].name
         text_content = ''
         html_content = render_to_string(
@@ -227,7 +229,7 @@ class Invitations(CreateAPIView):
             subject,
             text_content,
             settings.EMAIL_HOST_USER,
-            listEmails
+            listRegisteredEmails
         )
         msg.attach_alternative(html_content, "text/html")
         msg.mixed_subtype = 'related'
@@ -247,6 +249,7 @@ class ListUsers(ListAPIView):
     """
         Lista todos los usuarios mortales
     """
+    permission_classes = (IsAuthenticated,)
     serializer_class = MembersSerializer
 
     def get_queryset(self):
@@ -259,6 +262,7 @@ class List_Tribes(ListAPIView):
     """
         Lista los grupos creados por cada usuario
     """
+    permission_classes = (IsAuthenticated,)
     serializer_class = TribesSerializer
 
     def get_queryset(self):
@@ -271,6 +275,7 @@ class List_BelongTribes(ListAPIView):
     """
         Lista los grupos a los que pertenece cada usuario
     """
+    permission_classes = (IsAuthenticated,)
     serializer_class = TribesSerializer
 
     def get_queryset(self):
@@ -283,6 +288,7 @@ class List_Users(ListAPIView):
     """
         Vista para listar grupos por usuario
     """
+    permission_classes = (IsAuthenticated,)
     serializer_class = MembersSerializer
 
     def get_queryset(self):
@@ -301,6 +307,7 @@ class List_Groups(ListAPIView):
     """
         Vista para listar grupos
     """
+    permission_classes = (IsAuthenticated,)
     serializer_class = TribesSerializer
 
     def get_queryset(self):
@@ -319,6 +326,7 @@ class RetrieveMemebers(ListAPIView):
     """
         Devuelve los miembros de cada tribu
     """
+    permission_classes = (IsAuthenticated,)
     serializer_class = RetrieveMembersSerializer
 
     def get_queryset(self):
@@ -330,7 +338,7 @@ class RetrieveMemebers(ListAPIView):
 
 
 class AddTribes(CreateAPIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     serializer_class = CRUD_TribesSerializer
     queryset = Tribes.objects.all()
@@ -356,14 +364,13 @@ class AddTribes(CreateAPIView):
 
 
 class EditTribes(UpdateAPIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     serializer_class = CRUD_TribesSerializer
     queryset = Tribes.objects.all()
 
 
 class RemoveTribes(DestroyAPIView):
-    # authentication_classes = (TokenAuthentication,)
     permission_classes = [IsAuthenticated]
 
     serializer_class = CRUD_TribesSerializer

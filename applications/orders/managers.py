@@ -24,7 +24,7 @@ class OrderManager(models.Manager):
         return self.filter(
             event=idEvent,
             user=idUser
-        )
+        ).order_by('id')
 
 
 # class OrderItemManager(models.Manager):

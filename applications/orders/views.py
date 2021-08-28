@@ -16,6 +16,7 @@ class List_OrderEvent(ListAPIView):
     """
         Vista para listar la orden del evento
     """
+    permission_classes = (IsAuthenticated,)
     serializer_class = OrderSerializer
 
     def get_queryset(self):
@@ -28,6 +29,7 @@ class List_OrderUser(ListAPIView):
     """
         Vista para listar la orden del evento por usuario
     """
+    permission_classes = (IsAuthenticated,)
     serializer_class = OrderSerializer
 
     def get_queryset(self):
@@ -42,8 +44,7 @@ class List_OrderUser(ListAPIView):
 
 class AddCart(CreateAPIView):
 
-    #authentication_classes = (TokenAuthentication,)
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     serializer_class = CRUD_OrderItemSerializer
 
@@ -72,6 +73,7 @@ class AddCart(CreateAPIView):
 
 
 class EditCart(UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
     serializer_class = CRUD_OrderItemSerializer
     queryset = OrderItem.objects.all()
 
@@ -91,6 +93,7 @@ class EditCart(UpdateAPIView):
 
 
 class EditPaid(UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
     serializer_class = PaidOutSerializer
     queryset = Order.objects.all()
 
@@ -111,8 +114,7 @@ class EditPaid(UpdateAPIView):
 
 
 class RemoveCart(DestroyAPIView):
-    #authentication_classes = (TokenAuthentication,)
-    #permission_classes = [IsAuthenticated]
+    permission_classes = (IsAuthenticated,)
 
     serializer_class = CRUD_OrderItemSerializer
     queryset = OrderItem.objects.all()

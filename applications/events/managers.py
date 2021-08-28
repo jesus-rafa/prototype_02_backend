@@ -1,3 +1,5 @@
+from os import stat
+
 from django.db import models
 
 
@@ -11,6 +13,11 @@ class EventsManager(models.Manager):
 
     def filter_events(self, status):
 
+        if status == "EN PROCESO":
+            status = ["EN PROCESO", "LLEGO PEDIDO"]
+        elif status == "CONCLUIDO":
+            status = ["CONCLUIDO"]
+
         return self.filter(
-            status=status,
+            status__in=status,
         ).order_by('created')

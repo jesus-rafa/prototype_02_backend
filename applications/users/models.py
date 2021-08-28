@@ -1,7 +1,13 @@
+import random
+import string
+
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.core.mail import send_mail
+from django.core.mail import (EmailMessage, EmailMultiAlternatives, send_mail,
+                              send_mass_mail)
 from django.db import models
 from django.dispatch import receiver
+from django.template.loader import get_template, render_to_string
 from django.urls import reverse
 from django_rest_passwordreset.signals import reset_password_token_created
 
@@ -62,8 +68,10 @@ class Tribes(models.Model):
     name = models.CharField('Nombre', max_length=300, unique=True)
     description = models.CharField(
         'Descripcion', max_length=400, blank=True, null=True)
-    user = models.PositiveIntegerField(
-        'Creado por', blank=True)
+    # user = models.PositiveIntegerField(
+    #     'Creado por', blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             related_name='tribes_user', on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
     avatar = models.ImageField(
         'Avatar Grupo', blank=True, null=True, upload_to='users',)
@@ -85,17 +93,36 @@ class Tribes(models.Model):
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
 
-    email_plaintext_message = "{}?token={}".format(
-        reverse('password_reset:reset-password-request'), reset_password_token.key)
+    # email_plaintext_message = "{}?token={}".format(
+    #     reverse('password_reset:reset-password-request'), reset_password_token.key)
 
-    send_mail(
-        # title:
-        "Password Reset for {title}".format(title="Software Machine"),
-        # message:
-        email_plaintext_message,
-        # from:
-        # "noreply@somehost.local",
-        "rafalopezrl749@gmail.com",
-        # to:
+    # send_mail(
+    #     # title:
+    #     "Restauración de Contraseña {title}".format(title="App Eventos"),
+    #     # message:
+    #     email_plaintext_message,
+    #     # from:
+    #     settings.EMAIL_HOST_USER,
+    #     # to:
+    #     [reset_password_token.user.email]
+    # )
+    # new_password = ''.join(
+    #     [random.choice(string.digits + string.ascii_letters)
+    #      for i in range(0, 8)]
+    # )
+
+    # Envio de correo de restauración de contraseña
+    subject = "Restauración de Contraseña {title}".format(title="App Eventos")
+    text_content = ''
+    html_content = render_to_string(
+        'users/email/resetpassword_confirm.html',
+        {'token': reset_password_token.key}
+    )
+    msg = EmailMultiAlternatives(
+        subject,
+        text_content,
+        settings.EMAIL_HOST_USER,
         [reset_password_token.user.email]
     )
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()

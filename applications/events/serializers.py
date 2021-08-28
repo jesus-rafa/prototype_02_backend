@@ -82,6 +82,15 @@ class EventSerializer(serializers.ModelSerializer):
         )
 
 
+class StatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Event
+        fields = (
+            'status',
+        )
+
+
 class PaginationSerializer(pagination.PageNumberPagination):
 
     page_size = 2

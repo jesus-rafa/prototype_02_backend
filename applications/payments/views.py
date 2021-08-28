@@ -1,6 +1,7 @@
 import json
 
 from django.shortcuts import render
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -9,7 +10,7 @@ from .serializers import MercaodPagoSerializer
 
 class mercadopago(APIView):
 
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     serializer_class = MercaodPagoSerializer
 
@@ -39,21 +40,6 @@ class mercadopago(APIView):
             },
             "auto_return": "approved"
         }
-        # data = json.dumps({
-        #     "items": [
-        #         {
-        #             "title": "Donacion",
-        #             "quantity": 1,
-        #             "unit_price": 10.5
-        #         }
-        #     ],
-        #     "back_urls": {
-        #         "success": "http://localhost:8080",
-        #         "failure": "http://localhost:8080",
-        #         "pending": "http://localhost:8080"
-        #     },
-        #     "auto_return": "approved"
-        # })
 
         preference_response = sdk.preference().create(preference_data)
         preference = preference_response["response"]

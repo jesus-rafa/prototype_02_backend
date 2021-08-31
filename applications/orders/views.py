@@ -1,8 +1,9 @@
+from re import DEBUG
 from applications.events.models import Event
 from django.shortcuts import render
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.generics import (CreateAPIView, DestroyAPIView,
-                                     ListAPIView, UpdateAPIView)
+                                     ListAPIView, RetrieveAPIView, UpdateAPIView)
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
@@ -10,6 +11,7 @@ from .functions import update_order
 from .models import Order, OrderItem
 from .serializers import (CRUD_OrderItemSerializer, OrderSerializer,
                           PaidOutSerializer)
+from email.mime.image import MIMEImage                          
 
 
 class List_OrderEvent(ListAPIView):
@@ -24,6 +26,18 @@ class List_OrderEvent(ListAPIView):
 
         return Order.objects.order_event(idEvent)
 
+
+class List_OrderUsers(ListAPIView):
+    """
+        Vista para listar los usuarios en el evento
+    """
+    permission_classes = (IsAuthenticated,)
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        idEvent = self.kwargs['id']
+        """ return Order.objects. """
+        """ return Order.objects.order_event(idEvent) """
 
 class List_OrderUser(ListAPIView):
     """

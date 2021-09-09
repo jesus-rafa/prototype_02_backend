@@ -34,7 +34,7 @@ from .serializers import (ChangePasswordSerializer, CRUD_TribesSerializer,
                           InvitationSerializer, LoginSerializer,
                           MembersSerializer, RegisterSerializer,
                           RetrieveMembersSerializer, TribesSerializer,
-                          UserSerializer)
+                          UserSerializer,EmailSerializer)
 
 
 class LoginAPI(KnoxLoginView):
@@ -190,7 +190,43 @@ class Delivered(CreateAPIView):
             'message': 'Pedido Entregado Exitosamente!'
         }
 
+        return Response(response)    
+
+class Thank(CreateAPIView):
+    def create(self, request,  *args, **kwargs):
+        serializer = EmailSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        # Recuperar datos
+        listEmails = serializer.validated_data['listEmails']
+        print('-----------------------------------------------------')
+        print(request.data)
+        print('-----------------------------------------------------')
+        # Envio de correos para usuarios ya registrados
+        subject = 'Invitacion a un Evento: '
+        text_content = ''
+        html_content = render_to_string(
+            'users/email/thank.html',
+            {'data': listEmails}
+        )
+        msg = EmailMultiAlternatives(
+            subject,
+            text_content,
+            settings.EMAIL_HOST_USER,
+            listEmails
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.mixed_subtype = 'related'
+        msg.send()
+
+        response = {
+            'status': 'success',
+            'code': status.HTTP_200_OK,
+            'message': 'Pedido Entregado Exitosamente!'
+        }
+
         return Response(response)            
+        
 
 class Invitations(CreateAPIView):
     """ Enviar correos a todos los miembros de la tribu """

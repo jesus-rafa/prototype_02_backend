@@ -118,6 +118,10 @@ class EmailsListSerializer(serializers.ListField):
 
     emails = serializers.CharField()
 
+class EmailSerializer(serializers.Serializer):
+    """  formato para una lista de tipo serializador """
+
+    listEmails = EmailsListSerializer()
 
 class InvitationSerializer(serializers.Serializer):
     """ serializador para enviar los correos """

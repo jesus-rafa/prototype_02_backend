@@ -91,4 +91,9 @@ urlpatterns = [
         'api/tribes/delivered/',
         views.Delivered.as_view(),
     ),
+    # Enviar correo agradecimiento
+    path(
+        'api/tribes/thank/',
+        views.Thank.as_view(),
+    ),
 ]

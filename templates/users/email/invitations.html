@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns:v="urn:schemas-microsoft-com:vml">
@@ -248,11 +249,15 @@
                     <tr>
 
                         <td align="center" class="section-img">
-                            <a href=""
-                                style=" border-style: none !important; display: block; border: 0 !important;"><img
-                                    src="{{ info.image }}" style="display: block; width: 590px;" width="590" border="0"
-                                    alt="" /></a>
-
+                            {% if info.image %} 
+                            <a href="" style=" border-style: none !important; display: block; border: 0 !important;">
+                                <img src="{{ info.image }}" style="display: block; width: 590px;" width="590" border="0" alt="" />
+                            </a>
+                            {% else %}  
+                            <a href="" style=" border-style: none !important; display: block; border: 0 !important;">
+                                <img src="{% static 'images/events2.jpg' %}" style="display: block; width: 590px;" width="590" border="0" alt="" />
+                            </a>
+                            {% endif %}
                         </td>
                     </tr>
                     <tr>

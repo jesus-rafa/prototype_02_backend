@@ -24,7 +24,8 @@ class List_EventUser(ListAPIView):
     serializer_class = EventSerializer
 
     def get_queryset(self):
-        idUser = self.kwargs['id']
+        #idUser = self.kwargs['id']
+        idUser = self.request.user.id
 
         return Event.objects.events_by_user(idUser)
 
@@ -46,12 +47,13 @@ class ValidateEvent(generics.GenericAPIView):
     """
         Validar que el evento se administre por el creador del mismo
     """
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
 
         idEvent = self.kwargs['pk']
-        idUser = self.kwargs['idUser']
+        #idUser = self.kwargs['idUser']
+        idUser = self.request.user.id
 
         flag = False
         if Event.objects.filter(pk=idEvent, create_by=idUser).exists():
@@ -72,7 +74,7 @@ class RetrieveStatus(generics.GenericAPIView):
 
         query = Event.objects.filter(pk=idEvent)
 
-        return Response({'data': query[0].status})
+        return Response({'status': query[0].status, 'name': query[0].name})
 
 
 class CreateDetail(CreateAPIView):

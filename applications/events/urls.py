@@ -23,7 +23,7 @@ urlpatterns = [
     ),
     # Validar que el evento se administre por el creador del mismo
     path(
-        'api/events/validate/<pk>/<int:idUser>/',
+        'api/events/validate/<pk>/',
         views.ValidateEvent.as_view()
     ),
     # lista detalle de eventos
@@ -38,7 +38,7 @@ urlpatterns = [
     ),
     # lista eventos por usuario
     path(
-        'api/events/by-user/<int:id>/',
+        'api/events/by-user/',
         views.List_EventUser.as_view()
     ),
     path(

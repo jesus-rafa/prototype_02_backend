@@ -19,7 +19,7 @@ urlpatterns = [
     ),
     # lista orden por evento y por usuario
     path(
-        'api/orders/by-user/<int:idEvent>/<int:idUser>',
+        'api/orders/by-user/<int:idEvent>/',
         views.List_OrderUser.as_view(),
     ),
     # Agregar productos al carrito

@@ -32,6 +32,10 @@ urlpatterns = [
         views.EditUserAPI.as_view(),
     ),
     path(
+        'api/tribes/assign-permissions/<int:pk>/',
+        views.AssignPermissions.as_view(),
+    ),
+    path(
         'api/change-password/',
         views.ChangePasswordView.as_view(),
     ),
@@ -55,11 +59,11 @@ urlpatterns = [
         name='logoutall'
     ),
     path(
-        'api/tribes/by-user/<int:id>/',
+        'api/tribes/by-user/',
         views.List_Tribes.as_view(),
     ),
     path(
-        'api/users/belong-tribes/<int:id>/',
+        'api/users/belong-tribes/',
         views.List_BelongTribes.as_view(),
     ),
     path(
@@ -85,5 +89,13 @@ urlpatterns = [
     path(
         'api/tribes/',
         views.List_Groups.as_view(),
+    ),
+    path(
+        'api/tribes/leave/<int:pk>/',
+        views.LeaveTribe.as_view(),
+    ),
+    path(
+        'api/users/contact/',
+        views.Contact.as_view(),
     ),
 ]

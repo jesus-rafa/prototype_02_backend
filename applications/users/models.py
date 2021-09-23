@@ -28,7 +28,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     gender = models.CharField(
         max_length=1,
         choices=GENDER_CHOICES,
-        blank=True
+        blank=True,
+        null=True
     )
     date_birth = models.DateField(
         'Fecha de nacimiento',
@@ -36,7 +37,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True
     )
     avatar = models.ImageField(
-        'Avatar', blank=True, null=True, upload_to='users',)
+        'Avatar', blank=True, null=True, upload_to='users',
+    )
 
     #
     is_staff = models.BooleanField(default=False)
@@ -67,16 +69,17 @@ class Tribes(models.Model):
 
     name = models.CharField('Nombre', max_length=300, unique=True)
     description = models.CharField(
-        'Descripcion', max_length=400, blank=True, null=True)
-    # user = models.PositiveIntegerField(
-    #     'Creado por', blank=True)
+        'Descripcion', max_length=400, blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              related_name='tribes_user', on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
     avatar = models.ImageField(
-        'Avatar Grupo', blank=True, null=True, upload_to='users',)
+        'Avatar Grupo', blank=True, upload_to='users',)
     members = models.ManyToManyField(
-        User, blank=True, related_name='members'
+        User,
+        blank=True,
+        related_name="members",
+        through='Membership',
     )
 
     objects = TribesManager()
@@ -90,26 +93,21 @@ class Tribes(models.Model):
         return self.name
 
 
-@receiver(reset_password_token_created)
+class Membership(models.Model):
+    group = models.ForeignKey(Tribes, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+    is_admin = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Miembros'
+        verbose_name_plural = 'Miembros'
+        ordering = ['id']
+        unique_together = ('group', 'user',)
+
+
+@ receiver(reset_password_token_created)
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
-
-    # email_plaintext_message = "{}?token={}".format(
-    #     reverse('password_reset:reset-password-request'), reset_password_token.key)
-
-    # send_mail(
-    #     # title:
-    #     "Restauración de Contraseña {title}".format(title="App Eventos"),
-    #     # message:
-    #     email_plaintext_message,
-    #     # from:
-    #     settings.EMAIL_HOST_USER,
-    #     # to:
-    #     [reset_password_token.user.email]
-    # )
-    # new_password = ''.join(
-    #     [random.choice(string.digits + string.ascii_letters)
-    #      for i in range(0, 8)]
-    # )
 
     # Envio de correo de restauración de contraseña
     subject = "Restauración de Contraseña {title}".format(title="App Eventos")

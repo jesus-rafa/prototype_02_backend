@@ -5,12 +5,11 @@ from django.db.models import Count
 
 class UserManager(BaseUserManager, models.Manager):
 
-    def _create_user(self, email, password, names, last_names, gender, is_staff, is_superuser, is_active, **extra_fields):
+    def _create_user(self, email, names, last_names, password, is_staff, is_superuser, is_active, **extra_fields):
         user = self.model(
             email=email,
             names=names,
             last_names=last_names,
-            gender=gender,
             is_staff=is_staff,
             is_superuser=is_superuser,
             is_active=is_active,
@@ -20,11 +19,11 @@ class UserManager(BaseUserManager, models.Manager):
         user.save(using=self.db)
         return user
 
-    def create_user(self, email, names, last_names, gender, password=None, **extra_fields):
-        return self._create_user(email, names, last_names, gender, password, True, False, True, **extra_fields)
+    def create_user(self, email, names, last_names, password=None, **extra_fields):
+        return self._create_user(email, names, last_names, password, True, False, True, **extra_fields)
 
-    def create_superuser(self, email, password=None, **extra_fields):
-        return self._create_user(email, password, True, True, True, **extra_fields)
+    def create_superuser(self, email, names='', last_names='', password=None, **extra_fields):
+        return self._create_user(email,  names, last_names, password, True, True, True, **extra_fields)
 
 
 class TribesManager(models.Manager):

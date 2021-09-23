@@ -1,10 +1,10 @@
 #from django.contrib.auth.models import User
 from applications.events.serializers import UsersSerializers
-from applications.users.models import Tribes, User
+from applications.users.models import Membership, Tribes, User
+from django.contrib.auth.models import Permission
+from django.db.models import fields
 from django.db.models.fields.related import ManyToManyField
 from rest_framework import serializers
-
-# User Serializer
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -34,8 +34,27 @@ class MembersSerializer(serializers.ModelSerializer):
         )
 
 
+class MembershipSerializer(serializers.ModelSerializer):
+    #user = serializers.ReadOnlyField(source='user.id')
+    user = MembersSerializer()
+
+    class Meta:
+        model = Membership
+        fields = ('user', 'is_admin',)
+
+
+class RetrieveMembersSerializer(serializers.ModelSerializer):
+    members = MembershipSerializer(source='membership_set', many=True)
+
+    class Meta:
+        model = Tribes
+        fields = (
+            'id',
+            'members'
+        )
+
+
 class TribesSerializer(serializers.ModelSerializer):
-    #user = MembersSerializer()
     user = UsersSerializers()
     sum_members = serializers.SerializerMethodField()
 
@@ -47,7 +66,6 @@ class TribesSerializer(serializers.ModelSerializer):
             'description',
             'user',
             'avatar',
-            # 'members',
             'sum_members'
         )
 
@@ -55,31 +73,29 @@ class TribesSerializer(serializers.ModelSerializer):
         return obj.members.count()
 
 
-class RetrieveMembersSerializer(serializers.ModelSerializer):
-    members = MembersSerializer(many=True)
+class ListMembersSerializer(serializers.ListField):
+    """  formato para una lista de tipo serializador """
 
-    class Meta:
-        model = Tribes
-        fields = (
-            'id',
-            'members'
-        )
+    user = serializers.IntegerField()
 
 
-class CRUD_TribesSerializer(serializers.ModelSerializer):
-    # members = serializers.PrimaryKeyRelatedField(
-    #     many=True, queryset=User.objects.all())
+class ListAdminSerializer(serializers.ListField):
+    """ Lista de id con permisos de admin """
+    id = serializers.IntegerField()
 
-    class Meta:
-        model = Tribes
-        fields = (
-            'id',
-            'name',
-            'description',
-            'user',
-            'avatar',
-            'members'
-        )
+
+class AdminSerializer(serializers.Serializer):
+    members = ListAdminSerializer()
+
+
+class CRUD_TribesSerializer(serializers.Serializer):
+    """ serializador para enviar los correos """
+
+    name = serializers.CharField()
+    description = serializers.CharField(required=False)
+    user = serializers.IntegerField()
+    avatar = serializers.ImageField(required=False)
+    members = ListMembersSerializer(required=False)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -88,23 +104,29 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'email',
-            'password',
             'names',
             'last_names',
-            'gender'
+            'password',
         )
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         user = User.objects.create_user(
             validated_data['email'],
-            validated_data['password'],
             validated_data['names'],
             validated_data['last_names'],
-            validated_data['gender']
+            validated_data['password'],
         )
 
         return user
+
+
+class ContactSerializer(serializers.Serializer):
+    """ serializador para recuperar password de acceso """
+
+    contact = serializers.CharField()
+    email = serializers.CharField()
+    message = serializers.CharField()
 
 
 class LoginSerializer(serializers.Serializer):
@@ -123,9 +145,6 @@ class InvitationSerializer(serializers.Serializer):
     """ serializador para enviar los correos """
 
     idEvent = serializers.IntegerField(required=True)
-    # listEmails = serializers.ListField(
-    #     emails=serializers.CharField()
-    # )
     listEmails = EmailsListSerializer()
 
 

@@ -34,7 +34,8 @@ class List_OrderUser(ListAPIView):
 
     def get_queryset(self):
         idEvent = self.kwargs['idEvent']
-        idUser = self.kwargs['idUser']
+        #idUser = self.kwargs['idUser']
+        idUser = self.request.user.id
 
         return Order.objects.order_by_event_by_user(
             idEvent=idEvent,
@@ -104,9 +105,12 @@ class EditPaid(UpdateAPIView):
         )
         serializer.is_valid(raise_exception=True)
 
-        instance.amount_paid = serializer.validated_data['amount_paid']
-        if instance.amount >= serializer.validated_data['amount_paid']:
+        if serializer.validated_data['amount_paid'] >= instance.amount:
             instance.paid_out = True
+            instance.amount_paid = instance.amount
+        else:
+            instance.paid_out = False
+            instance.amount_paid = serializer.validated_data['amount_paid']
 
         instance.save()
 

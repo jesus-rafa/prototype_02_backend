@@ -1,4 +1,4 @@
-#from django.contrib.sites.models import Site
+# from django.contrib.sites.models import Site
 import datetime
 import os
 import random
@@ -8,7 +8,7 @@ from email.mime.image import MIMEImage
 from applications.events.models import Event
 from applications.orders.models import Order
 from applications.users import serializers
-from applications.users.models import Tribes, User
+from applications.users.models import Membership, Tribes, User
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login
@@ -30,8 +30,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import (ChangePasswordSerializer, CRUD_TribesSerializer,
-                          InvitationSerializer, LoginSerializer,
+from .serializers import (AdminSerializer, ChangePasswordSerializer,
+                          ContactSerializer, CRUD_TribesSerializer,
+                          InvitationSerializer, ListAdminSerializer,
+                          ListMembersSerializer, LoginSerializer,
                           MembersSerializer, RegisterSerializer,
                           RetrieveMembersSerializer, TribesSerializer,
                           UserSerializer)
@@ -60,6 +62,24 @@ class RegisterAPI(generics.GenericAPIView):
         return Response({
             "user": UserSerializer(user, context=self.get_serializer_context()).data,
             "token": AuthToken.objects.create(user)[1]
+        })
+
+
+class LeaveTribe(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+
+        idGroup = self.kwargs['pk']
+        #idUser = self.kwargs['idUser']
+        idUser = self.request.user.id
+
+        instance = Tribes.objects.get(pk=idGroup, members=idUser)
+        instance.members.remove(idUser)
+        instance.save()
+
+        return Response({
+            "response": 'ok'
         })
 
 
@@ -114,7 +134,7 @@ class ChangePasswordView(generics.UpdateAPIView):
 
 
 class SendEmail(TemplateView):
-    #template_name = 'users/reset_email.html'
+    # template_name = 'users/reset_email.html'
     template_name = 'payments/mercadopago.html'
 
 
@@ -162,10 +182,11 @@ class Invitations(CreateAPIView):
         event_instance.save()
 
         # cargar adjuntos en el email
-        coupon_image = event[0].image
-        img_data = coupon_image.read()
-        img = MIMEImage(img_data)
-        img.add_header('Content-ID', '<coupon_image>')
+        if event[0].image:
+            coupon_image = event[0].image
+            img_data = coupon_image.read()
+            img = MIMEImage(img_data)
+            img.add_header('Content-ID', '<coupon_image>')
 
         for email in listEmails:
             if User.objects.filter(email=email).exists():
@@ -190,7 +211,7 @@ class Invitations(CreateAPIView):
                 )
 
                 User.objects.create_user(
-                    email, password, '', '', ''
+                    email, password, '', ''
                 )
                 user_new = User.objects.get(email=email)
 
@@ -214,8 +235,9 @@ class Invitations(CreateAPIView):
                     [email]
                 )
                 msg2.attach_alternative(html_content, "text/html")
-                msg2.mixed_subtype = 'related'
-                msg2.attach(img)
+                if event[0].image:
+                    msg2.mixed_subtype = 'related'
+                    msg2.attach(img)
                 msg2.send()
 
         # Envio de correos para usuarios ya registrados
@@ -232,8 +254,9 @@ class Invitations(CreateAPIView):
             listRegisteredEmails
         )
         msg.attach_alternative(html_content, "text/html")
-        msg.mixed_subtype = 'related'
-        msg.attach(img)
+        if event[0].image:
+            msg.mixed_subtype = 'related'
+            msg.attach(img)
         msg.send()
 
         response = {
@@ -266,7 +289,8 @@ class List_Tribes(ListAPIView):
     serializer_class = TribesSerializer
 
     def get_queryset(self):
-        idUser = self.kwargs['id']
+        #idUser = self.kwargs['id']
+        idUser = self.request.user.id
 
         return Tribes.objects.tribes_by_user(idUser)
 
@@ -275,11 +299,12 @@ class List_BelongTribes(ListAPIView):
     """
         Lista los grupos a los que pertenece cada usuario
     """
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
     serializer_class = TribesSerializer
 
     def get_queryset(self):
-        idUser = self.kwargs['id']
+        #idUser = self.kwargs['id']
+        idUser = self.request.user.id
 
         return Tribes.objects.belong_to_tribes(idUser)
 
@@ -326,7 +351,7 @@ class RetrieveMemebers(ListAPIView):
     """
         Devuelve los miembros de cada tribu
     """
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
     serializer_class = RetrieveMembersSerializer
 
     def get_queryset(self):
@@ -337,41 +362,158 @@ class RetrieveMemebers(ListAPIView):
         )
 
 
-class AddTribes(CreateAPIView):
+class AddTribes(generics.GenericAPIView):
     permission_classes = (IsAuthenticated,)
-
     serializer_class = CRUD_TribesSerializer
-    queryset = Tribes.objects.all()
 
-    # def create(self, request, *args, **kwargs):
-    #     serializer = CRUD_TribesSerializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
+    def post(self, request, *args, **kwargs):
+        serializer = CRUD_TribesSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    #     data = request.data
-    #     members = data['members[]'].split(", ")
+        # Recuperamos datos
+        members = serializer.validated_data['members']
+        name = serializer.validated_data['name']
+        description = serializer.validated_data['description']
+        idUser = serializer.validated_data['user']
+        avatar = serializer.validated_data['avatar']
 
-    #     print(members)
+        # Instancia del user
+        instance_user = User.objects.get(id=idUser)
 
-    #     Tribes.objects.create(
-    #         name=serializer.validated_data['name'],
-    #         description=serializer.validated_data['description'],
-    #         user=serializer.validated_data['user'],
-    #         avatar=serializer.validated_data['avatar'],
-    #         members=members
-    #     )
+        # Se crea el grupo
+        instance_group = Tribes.objects.create(
+            name=name,
+            description=description,
+            user=instance_user,
+            avatar=avatar,
+        )
 
-    #     return Response({'res': 'ok'})
+        # Agregar miembros a la lista: list_members[]
+        list_members = []
+        for member in members:
+            instance_member = User.objects.get(id=member)
+            members = Membership(
+                group=instance_group,
+                user=instance_member,
+                is_admin=False
+            )
+            list_members.append(members)
+
+        # Insertamos list_members[]
+        Membership.objects.bulk_create(list_members)
+
+        return Response({'response': 'ok'})
 
 
 class EditTribes(UpdateAPIView):
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
 
     serializer_class = CRUD_TribesSerializer
     queryset = Tribes.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+
+        # Recuperamos datos
+        members = serializer.validated_data['members']
+        description = serializer.validated_data['description']
+        avatar = serializer.validated_data['avatar']
+
+        # Actualizamos informacion
+        instance.description = description
+        instance.avatar = avatar
+        instance.save()
+
+        # Filtrar usuarios actuales
+        data = Membership.objects.filter(group=instance)
+
+        for row in data:
+            instance_member = User.objects.get(email=row.user)
+
+            # Quitar usuario del grupo
+            if instance_member.id not in members:
+                instance.members.remove(instance_member)
+
+        for row in members:
+            instance_member = User.objects.get(id=row)
+
+            # Si el usuario no existe en el grupo, lo agrega
+            user, created = Membership.objects.get_or_create(
+                group=instance,
+                user=instance_member
+            )
+
+        return Response({'response': 'ok'})
+
+
+class AssignPermissions(UpdateAPIView):
+    # permission_classes = (IsAuthenticated,)
+
+    serializer_class = AdminSerializer
+    queryset = Tribes.objects.all()
+
+    def post(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+
+        # Recuperamos lista de id´s is_admin = True
+        members = serializer.validated_data['members']
+
+        # Agregar permisos de admin
+        Membership.objects.filter(
+            group=instance,
+            user__in=members
+        ).update(is_admin=True)
+
+        # Quitar permisos de admin
+        Membership.objects.filter(
+            group=instance
+        ).exclude(
+            user__in=members
+        ).update(is_admin=False)
+
+        return Response({'response': 'ok'})
 
 
 class RemoveTribes(DestroyAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, ]
 
     serializer_class = CRUD_TribesSerializer
     queryset = Tribes.objects.all()
+
+
+class Contact(generics.GenericAPIView):
+    serializer_class = ContactSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        contact = serializer.validated_data['contact']
+        email = serializer.validated_data['email']
+        message = serializer.validated_data['message']
+
+        # Envio de correo
+        subject = 'Contacto: ' + contact
+        text_content = ''
+        html_content = render_to_string(
+            'users/email/contact.html',
+            {'contact': contact, 'email': email, 'message': message}
+        )
+        msg = EmailMultiAlternatives(
+            subject,
+            text_content,
+            settings.EMAIL_HOST_USER,
+            [settings.EMAIL_HOST_USER]
+        )
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
+
+        return Response({'response': 'ok'})

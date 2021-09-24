@@ -92,10 +92,10 @@ class CRUD_TribesSerializer(serializers.Serializer):
     """ serializador para enviar los correos """
 
     name = serializers.CharField()
-    description = serializers.CharField(required=False)
+    description = serializers.CharField(required=False, allow_null=True)
     user = serializers.IntegerField()
-    avatar = serializers.ImageField(required=False)
-    members = ListMembersSerializer(required=False)
+    avatar = serializers.ImageField(required=False, allow_null=True)
+    members = ListMembersSerializer(required=False, allow_null=True)
 
 
 class RegisterSerializer(serializers.ModelSerializer):

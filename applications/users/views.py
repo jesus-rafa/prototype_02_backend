@@ -66,13 +66,11 @@ class RegisterAPI(generics.GenericAPIView):
 
 
 class LeaveTribe(generics.GenericAPIView):
-    permission_classes = (IsAuthenticated,)
 
-    def post(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
 
         idGroup = self.kwargs['pk']
-        #idUser = self.kwargs['idUser']
-        idUser = self.request.user.id
+        idUser = self.kwargs['idUser']
 
         instance = Tribes.objects.get(pk=idGroup, members=idUser)
         instance.members.remove(idUser)
@@ -370,12 +368,18 @@ class AddTribes(generics.GenericAPIView):
         serializer = CRUD_TribesSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        print(request.data)
         # Recuperamos datos
         members = serializer.validated_data['members']
         name = serializer.validated_data['name']
-        description = serializer.validated_data['description']
         idUser = serializer.validated_data['user']
-        avatar = serializer.validated_data['avatar']
+
+        try:
+            description = serializer.validated_data['description']
+            avatar = serializer.validated_data['avatar']
+        except:
+            description = ''
+            avatar = None
 
         # Instancia del user
         instance_user = User.objects.get(id=idUser)
@@ -405,8 +409,8 @@ class AddTribes(generics.GenericAPIView):
         return Response({'response': 'ok'})
 
 
-class EditTribes(UpdateAPIView):
-    # permission_classes = (IsAuthenticated,)
+class EditTribes(generics.GenericAPIView):
+    permission_classes = (IsAuthenticated,)
 
     serializer_class = CRUD_TribesSerializer
     queryset = Tribes.objects.all()
@@ -420,13 +424,22 @@ class EditTribes(UpdateAPIView):
 
         # Recuperamos datos
         members = serializer.validated_data['members']
-        description = serializer.validated_data['description']
-        avatar = serializer.validated_data['avatar']
 
-        # Actualizamos informacion
-        instance.description = description
-        instance.avatar = avatar
-        instance.save()
+        try:
+            description = serializer.validated_data['description']
+        except:
+            description = ''
+
+        try:
+            avatar = serializer.validated_data['avatar']
+        except:
+            avatar = None
+
+        if description != '':
+            instance.description = description
+
+        if avatar != None:
+            instance.avatar = avatar
 
         # Filtrar usuarios actuales
         data = Membership.objects.filter(group=instance)
@@ -434,18 +447,34 @@ class EditTribes(UpdateAPIView):
         for row in data:
             instance_member = User.objects.get(email=row.user)
 
-            # Quitar usuario del grupo
-            if instance_member.id not in members:
+            # eliminar usuarios del grupo
+            if not str(instance_member.id) in members:
                 instance.members.remove(instance_member)
 
+        new_members = []
         for row in members:
             instance_member = User.objects.get(id=row)
 
-            # Si el usuario no existe en el grupo, lo agrega
-            user, created = Membership.objects.get_or_create(
+            # Buscamos si el usuario ya existe en el grupo
+            member = Membership.objects.filter(
                 group=instance,
-                user=instance_member
+                user=str(row)
             )
+
+            # Agregar miembros a la lista: list_members[]
+            if not member:
+                members = Membership(
+                    group=instance,
+                    user=instance_member,
+                    is_admin=False
+                )
+                new_members.append(members)
+
+        # Insertamos los nuevos usuario list_members[]
+        Membership.objects.bulk_create(new_members)
+
+        # Actualizamos instancia
+        instance.save()
 
         return Response({'response': 'ok'})
 

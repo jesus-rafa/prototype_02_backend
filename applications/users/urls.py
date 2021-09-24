@@ -91,7 +91,7 @@ urlpatterns = [
         views.List_Groups.as_view(),
     ),
     path(
-        'api/tribes/leave/<int:pk>/',
+        'api/tribes/leave/<int:pk>/<int:idUser>/',
         views.LeaveTribe.as_view(),
     ),
     path(

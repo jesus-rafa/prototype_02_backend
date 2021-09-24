@@ -69,12 +69,12 @@ class Tribes(models.Model):
 
     name = models.CharField('Nombre', max_length=300, unique=True)
     description = models.CharField(
-        'Descripcion', max_length=400, blank=True)
+        'Descripcion', max_length=400, blank=True, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              related_name='tribes_user', on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
     avatar = models.ImageField(
-        'Avatar Grupo', blank=True, upload_to='users',)
+        'Avatar Grupo', blank=True, null=True, upload_to='users',)
     members = models.ManyToManyField(
         User,
         blank=True,

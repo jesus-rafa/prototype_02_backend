@@ -23,7 +23,7 @@ class UserManager(BaseUserManager, models.Manager):
         return self._create_user(email, names, last_names, password, True, False, True, **extra_fields)
 
     def create_superuser(self, email, names='', last_names='', password=None, **extra_fields):
-        return self._create_user(email,  names, last_names, password, True, True, True, **extra_fields)
+        return self._create_user(email, names, last_names, password, True, True, True, **extra_fields)
 
 
 class TribesManager(models.Manager):

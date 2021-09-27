@@ -89,6 +89,16 @@ urlpatterns = [
     path(
         'api/tribes/',
         views.List_Groups.as_view(),
+    ),    
+    # Enviar correo llego pedido
+    path(
+        'api/tribes/delivered/',
+        views.Delivered.as_view(),
+    ),
+    # Enviar correo agradecimiento
+    path(
+        'api/tribes/thank/',
+        views.Thank.as_view(),
     ),
     path(
         'api/tribes/leave/<int:pk>/<int:idUser>/',

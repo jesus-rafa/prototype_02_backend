@@ -36,5 +36,5 @@ urlpatterns = [
     path(
         'api/orders/cart/remove/<int:pk>/',
         views.RemoveCart.as_view(),
-    )
+    ),
 ]

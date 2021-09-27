@@ -17,6 +17,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path
+from snack_app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -39,7 +40,9 @@ urlpatterns = [
     re_path('', include('applications.events.routers')),
     re_path('', include('applications.orders.routers')),
 
-
+    #Social Login
+    path("logina/", views.login, name="login"),
+    path('oauth/', include('social_django.urls', namespace='social')),
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

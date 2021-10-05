@@ -32,11 +32,11 @@ from rest_framework.views import APIView
 
 from .serializers import (AdminSerializer, ChangePasswordSerializer,
                           ContactSerializer, CRUD_TribesSerializer,
-                          InvitationSerializer, ListAdminSerializer,
-                          ListMembersSerializer, LoginSerializer,
-                          MembersSerializer, RegisterSerializer,
-                          RetrieveMembersSerializer, TribesSerializer,
-                          UserSerializer,EmailSerializer)
+                          EmailSerializer, InvitationSerializer,
+                          ListAdminSerializer, ListMembersSerializer,
+                          LoginSerializer, MembersSerializer,
+                          RegisterSerializer, RetrieveMembersSerializer,
+                          TribesSerializer, UserSerializer)
 
 
 class LoginAPI(KnoxLoginView):
@@ -159,6 +159,7 @@ class SendFormEmail(View):
         messages.success(request, ('Email sent successfully.'))
         return True
 
+
 class Delivered(CreateAPIView):
     """ Enviar correos a todos los miembros de la tribu """
     serializer_class = InvitationSerializer
@@ -171,12 +172,12 @@ class Delivered(CreateAPIView):
         # Recuperar datos
         idEvent = serializer.validated_data['idEvent']
         listEmails = serializer.validated_data['listEmails']
-        #listRegisteredEmails = []
+        # listRegisteredEmails = []
 
         event = Event.objects.filter(id=idEvent)
-        #event_instance = Event.objects.get(id=idEvent)
-        #event_instance.status = 'EN PROCESO'
-        #event_instance.save()
+        # event_instance = Event.objects.get(id=idEvent)
+        # event_instance.status = 'EN PROCESO'
+        # event_instance.save()
 
         # cargar adjuntos en el email
         coupon_image = event[0].image
@@ -208,13 +209,14 @@ class Delivered(CreateAPIView):
             'message': 'Pedido Entregado Exitosamente!'
         }
 
-        return Response(response)    
+        return Response(response)
+
 
 class Thank(CreateAPIView):
     def create(self, request,  *args, **kwargs):
         serializer = EmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         # Recuperar datos
         listEmails = serializer.validated_data['listEmails']
         print('-----------------------------------------------------')
@@ -243,8 +245,8 @@ class Thank(CreateAPIView):
             'message': 'Pedido Entregado Exitosamente!'
         }
 
-        return Response(response)            
-        
+        return Response(response)
+
 
 class Invitations(CreateAPIView):
     """ Enviar correos a todos los miembros de la tribu """
@@ -349,7 +351,8 @@ class Invitations(CreateAPIView):
             'message': 'Invitaciones Enviadas Exitosamente!'
         }
 
-        return Response(response)     
+        return Response(response)
+
 
 class ListUsers(ListAPIView):
     """
@@ -372,7 +375,7 @@ class List_Tribes(ListAPIView):
     serializer_class = TribesSerializer
 
     def get_queryset(self):
-        #idUser = self.kwargs['id']
+        # idUser = self.kwargs['id']
         idUser = self.request.user.id
 
         return Tribes.objects.tribes_by_user(idUser)
@@ -386,7 +389,7 @@ class List_BelongTribes(ListAPIView):
     serializer_class = TribesSerializer
 
     def get_queryset(self):
-        #idUser = self.kwargs['id']
+        # idUser = self.kwargs['id']
         idUser = self.request.user.id
 
         return Tribes.objects.belong_to_tribes(idUser)
@@ -453,45 +456,53 @@ class AddTribes(generics.GenericAPIView):
         serializer = CRUD_TribesSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        print(request.data)
         # Recuperamos datos
         members = serializer.validated_data['members']
         name = serializer.validated_data['name']
         idUser = serializer.validated_data['user']
 
-        try:
-            description = serializer.validated_data['description']
-            avatar = serializer.validated_data['avatar']
-        except:
-            description = ''
-            avatar = None
+        if Tribes.objects.filter(name=name).exists():
+            return Response({"error": "Ya existe este grupo: " + name}, status=status.HTTP_400_BAD_REQUEST)
+        else:
 
-        # Instancia del user
-        instance_user = User.objects.get(id=idUser)
+            try:
+                description = serializer.validated_data['description']
+            except:
+                description = ''
 
-        # Se crea el grupo
-        instance_group = Tribes.objects.create(
-            name=name,
-            description=description,
-            user=instance_user,
-            avatar=avatar,
-        )
+            try:
+                avatar = serializer.validated_data['avatar']
+            except:
+                avatar = None
 
-        # Agregar miembros a la lista: list_members[]
-        list_members = []
-        for member in members:
-            instance_member = User.objects.get(id=member)
-            members = Membership(
-                group=instance_group,
-                user=instance_member,
-                is_admin=False
+            # Instancia del user
+            instance_user = User.objects.get(id=idUser)
+
+            # Se crea el grupo
+            instance_group = Tribes.objects.create(
+                name=name,
+                description=description,
+                user=instance_user,
+                avatar=avatar,
             )
-            list_members.append(members)
 
-        # Insertamos list_members[]
-        Membership.objects.bulk_create(list_members)
+            # Agregar miembros a la lista: list_members[]
+            list_members = []
+            for member in members:
+                instance_member = User.objects.get(id=member)
+                members = Membership(
+                    group=instance_group,
+                    user=instance_member,
+                    is_admin=False
+                )
+                list_members.append(members)
 
-        return Response({'response': 'ok'})
+            # Insertamos list_members[]
+            Membership.objects.bulk_create(list_members)
+
+            success = "Grupo creado exitosamente!"
+
+            return Response({'success': success})
 
 
 class EditTribes(generics.GenericAPIView):
@@ -508,7 +519,15 @@ class EditTribes(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
 
         # Recuperamos datos
+        name = serializer.validated_data['name']
         members = serializer.validated_data['members']
+
+        if instance.name != name:
+            if Tribes.objects.filter(name=name).exists():
+                return Response({"error": "Ya existe este grupo: " + name}, status=status.HTTP_400_BAD_REQUEST)
+
+            # guardarmos nuevo nombre del grupo
+            instance.name = name
 
         try:
             description = serializer.validated_data['description']
@@ -546,7 +565,7 @@ class EditTribes(generics.GenericAPIView):
                 user=str(row)
             )
 
-            # Agregar miembros a la lista: list_members[]
+            # Agregar miembros a la lista: new_members[]
             if not member:
                 members = Membership(
                     group=instance,
@@ -555,13 +574,15 @@ class EditTribes(generics.GenericAPIView):
                 )
                 new_members.append(members)
 
-        # Insertamos los nuevos usuario list_members[]
+        # Insertamos los nuevos usuarios new_members[]
         Membership.objects.bulk_create(new_members)
 
-        # Actualizamos instancia
+        # Guardamos instancia
         instance.save()
 
-        return Response({'response': 'ok'})
+        success = "Grupo actualizado exitosamente!"
+
+        return Response({'success': success})
 
 
 class AssignPermissions(UpdateAPIView):

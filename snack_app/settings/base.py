@@ -52,7 +52,7 @@ THIRD_PARTY_APPS = (
     'knox',
     'corsheaders',
     'mercadopago',
-    'social_django',  # <-- Here social-auth-app-django
+    # 'social_django',  # <-- Here social-auth-app-django
 )
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
@@ -76,7 +76,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'social_django.middleware.SocialAuthExceptionMiddleware',  # <-- Here
+    # 'social_django.middleware.SocialAuthExceptionMiddleware',  # <-- Here
 ]
 
 
@@ -100,9 +100,9 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',                
-                'social_django.context_processors.backends',  # <-- Here
-                'social_django.context_processors.login_redirect', # <-- Here
+                'django.contrib.messages.context_processors.messages',
+                # 'social_django.context_processors.backends',  # <-- Here
+                # 'social_django.context_processors.login_redirect',  # <-- Here
             ],
         },
     },
@@ -147,27 +147,24 @@ USE_L10N = True
 USE_TZ = True
 
 AUTHENTICATION_BACKENDS = (
-    'social_core.backends.facebook.FacebookOAuth2',
-    #'social_core.backends.twitter.TwitterOAuth',
-    #'social_core.backends.github.GithubOAuth2',
-    #'social_core.backends.open_id.OpenIdAuth',
-    #'social_core.backends.google.GoogleOpenId',
-    #'social_core.backends.google.GoogleOAuth2',
-    'social_core.backends.google.GoogleOAuth',
-    #'social_core.backends.twitter.TwitterOAuth',
-    #'social_core.backends.yahoo.YahooOpenId',
-    'social_core.backends.apple.AppleIdAuth', 
-    #'users.backends.AppleIdAppAuth',
-    #'users.backends.AppleIdWebAuth',
+    # 'social_core.backends.facebook.FacebookOAuth2',
+    # 'social_core.backends.twitter.TwitterOAuth',
+    # 'social_core.backends.github.GithubOAuth2',
+    # 'social_core.backends.open_id.OpenIdAuth',
+    # 'social_core.backends.google.GoogleOpenId',
+    # 'social_core.backends.google.GoogleOAuth2',
+    # 'social_core.backends.google.GoogleOAuth',
+    # 'social_core.backends.twitter.TwitterOAuth',
+    # 'social_core.backends.yahoo.YahooOpenId',
+    # 'social_core.backends.apple.AppleIdAuth',
+    # 'users.backends.AppleIdAppAuth',
+    # 'users.backends.AppleIdWebAuth',
 
     'django.contrib.auth.backends.ModelBackend',
-    
+
 )
 
-""" LOGIN_URL = 'login'
-LOGOUT_URL = 'logout'
-LOGIN_REDIRECT_URL = 'home' """
 
-SOCIAL_AUTH_FACEBOOK_KEY = '209813464447923'  # App ID
-SOCIAL_AUTH_FACEBOOK_SECRET = '90664640d2a5c6f282d73ea3e7d3cbf1'  # App Secret
+# SOCIAL_AUTH_FACEBOOK_KEY = '209813464447923'  # App ID
+# SOCIAL_AUTH_FACEBOOK_SECRET = '90664640d2a5c6f282d73ea3e7d3cbf1'  # App Secret
 #SOCIAL_AUTH_POSTGRES_JSONFIELD = True

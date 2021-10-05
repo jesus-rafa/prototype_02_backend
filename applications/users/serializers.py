@@ -18,7 +18,8 @@ class UserSerializer(serializers.ModelSerializer):
             'gender',
             'date_birth',
             'avatar',
-            'get_full_name'
+            'get_full_name',
+            'is_superuser'
         )
 
 

@@ -5,7 +5,7 @@ import random
 import string
 from email.mime.image import MIMEImage
 
-from applications.events.models import Event
+from applications.events.models import Event, Participants
 from applications.orders.models import Order
 from applications.users import serializers
 from applications.users.models import Membership, Tribes, User
@@ -264,6 +264,7 @@ class Invitations(CreateAPIView):
         listEmails = serializer.validated_data['listEmails']
         listRegisteredEmails = []
 
+        # Recuperar instancia del evento
         event = Event.objects.filter(id=idEvent)
         event_instance = Event.objects.get(id=idEvent)
         event_instance.status = 'EN PROCESO'
@@ -284,11 +285,11 @@ class Invitations(CreateAPIView):
 
             # Crear las ordenes de cada participante
             if user_instance:
-                Order.objects.create(
-                    event=event_instance,
-                    user=user_instance,
-                    date=datetime.date.today()
-                )
+                # Order.objects.create(
+                #     event=event_instance,
+                #     user=user_instance,
+                #     date=datetime.date.today()
+                # )
 
                 listRegisteredEmails.append(email)
             else:
@@ -301,13 +302,13 @@ class Invitations(CreateAPIView):
                 User.objects.create_user(
                     email, password, '', ''
                 )
-                user_new = User.objects.get(email=email)
+                # user_new = User.objects.get(email=email)
 
-                Order.objects.create(
-                    event=event_instance,
-                    user=user_new,
-                    date=datetime.date.today()
-                )
+                # Order.objects.create(
+                #     event=event_instance,
+                #     user=user_new,
+                #     date=datetime.date.today()
+                # )
 
                 # Envio de correos para usuarios nuevos
                 subject = 'Invitacion a un Evento: ' + event[0].name

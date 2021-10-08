@@ -2,7 +2,7 @@ from applications.users.models import User
 from django.db.models import fields
 from rest_framework import pagination, serializers
 
-from .models import Event, Event_Detail
+from .models import Event, Event_Detail, Participants
 
 
 class UsersSerializers(serializers.ModelSerializer):
@@ -95,3 +95,37 @@ class PaginationSerializer(pagination.PageNumberPagination):
 
     page_size = 3
     max_page_size = 10
+
+
+class ParticipantsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id',
+            'email',
+            'avatar',
+            'get_full_name',
+            'get_initials'
+        )
+
+
+class ParticipantshipSerializer(serializers.ModelSerializer):
+    user = ParticipantsSerializer()
+
+    class Meta:
+        model = Participants
+        fields = ('user', 'is_admin',)
+
+
+class RetrieveParticipantserializer(serializers.ModelSerializer):
+    participants = ParticipantshipSerializer(
+        source='participants_event',
+        many=True
+    )
+
+    class Meta:
+        model = Event
+        fields = (
+            'id',
+            'participants'
+        )

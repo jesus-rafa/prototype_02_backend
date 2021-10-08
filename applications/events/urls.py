@@ -21,10 +21,10 @@ urlpatterns = [
         'api/events/status/<pk>/',
         views.RetrieveStatus.as_view()
     ),
-    # Validar que el evento se administre por el creador del mismo
+    # Validar que el evento se administre por los administradores
     path(
         'api/events/validate/<pk>/',
-        views.ValidateEvent.as_view()
+        views.ValidatePermissions.as_view()
     ),
     # lista detalle de eventos
     path(
@@ -40,6 +40,21 @@ urlpatterns = [
     path(
         'api/events/by-user/',
         views.List_EventUser.as_view()
+    ),
+    # Agregar participantes al evento
+    path(
+        'api/events/add-participants/',
+        views.AddParticipants.as_view(),
+    ),
+    # Devuelve los participantes del evento
+    path(
+        'api/events/participants/<int:pk>/',
+        views.RetrieveParticipants.as_view(),
+    ),
+    # Agregar permisos de admin
+    path(
+        'api/events/assign-permissions/<int:pk>/',
+        views.AssignPermissions.as_view(),
     ),
     path(
         'api/events/detail/create/',

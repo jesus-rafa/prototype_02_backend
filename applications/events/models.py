@@ -1,3 +1,4 @@
+from applications.users.models import User
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.conf import settings
 from django.db import models
@@ -31,6 +32,12 @@ class Event(TimeStampedModel):
     image = models.ImageField(
         'Imagen', blank=True, null=True, upload_to='events',)
     is_active = models.BooleanField(default=True)
+    participants = models.ManyToManyField(
+        User,
+        blank=True,
+        related_name="list_members",
+        through='Participants',
+    )
 
     objects = EventsManager()
 
@@ -67,6 +74,25 @@ class Event_Detail(TimeStampedModel):
     class Meta:
         verbose_name = 'Detalle Eventos'
         verbose_name_plural = 'Detalle Eventos'
+
+    def __str__(self):
+        return str(self.name)
+
+
+class Participants(models.Model):
+    name = models.ForeignKey(
+        Event, on_delete=models.CASCADE, related_name='participants_event'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    is_admin = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'Participantes'
+        verbose_name_plural = 'Participantes'
+        unique_together = ('name', 'user',)
 
     def __str__(self):
         return str(self.name)

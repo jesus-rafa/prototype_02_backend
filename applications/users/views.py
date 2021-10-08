@@ -180,10 +180,11 @@ class Delivered(CreateAPIView):
         # event_instance.save()
 
         # cargar adjuntos en el email
-        coupon_image = event[0].image
-        img_data = coupon_image.read()
-        img = MIMEImage(img_data)
-        img.add_header('Content-ID', '<coupon_image>')
+        if event[0].image:
+            coupon_image = event[0].image
+            img_data = coupon_image.read()
+            img = MIMEImage(img_data)
+            img.add_header('Content-ID', '<coupon_image>')
 
         # Envio de correos para usuarios ya registrados
         subject = 'Invitacion a un Evento: ' + event[0].name
@@ -199,8 +200,9 @@ class Delivered(CreateAPIView):
             listEmails
         )
         msg.attach_alternative(html_content, "text/html")
-        msg.mixed_subtype = 'related'
-        msg.attach(img)
+        if event[0].image:
+            msg.mixed_subtype = 'related'
+            msg.attach(img)
         msg.send()
 
         response = {

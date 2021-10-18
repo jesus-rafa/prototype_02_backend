@@ -52,7 +52,6 @@ THIRD_PARTY_APPS = (
     'knox',
     'corsheaders',
     'mercadopago',
-    # 'social_django',  # <-- Here social-auth-app-django
 )
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
